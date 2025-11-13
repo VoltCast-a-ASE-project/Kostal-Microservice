@@ -10,9 +10,9 @@ class HAClient:
         self.token = os.getenv("HA_TOKEN")
 
         if not self.base_url:
-            raise ValueError("HA_REST_URL fehlt!")
+            raise ValueError("HA_REST_URL is missing!")
         if not self.token:
-            raise ValueError("HA_TOKEN fehlt!")
+            raise ValueError("HA_TOKEN is missing!")
 
         self.headers = {
             "Authorization": f"Bearer {self.token}",
