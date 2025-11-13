@@ -3,10 +3,10 @@ from fastapi import FastAPI
 from app.ha_client import HAClient
 import logging
 import os
+load_dotenv()
 
 app = FastAPI()
 ha_client = HAClient()
-load_dotenv()
 log = logging.getLogger("uvicorn.info")
 
 @app.get("/kostal/batterysoc")
@@ -28,7 +28,7 @@ async def battery_power():
         "battery_power_in": state["state"],
         "unit_of_measurement": state.get("attributes", {}).get("unit_of_measurement")
     }
-@app.get("/kostal/battery_power_out")
+@app.get("/kostal/batterypowerout")
 async def battery_power_out():
     state = await ha_client.get_entity_state(os.getenv("BATTERY_POWER_OUT"))
     log.info(f"BATTERY_POWER_OUT: {state}")
@@ -37,7 +37,7 @@ async def battery_power_out():
         "battery_power_out": state["state"],
         "unit_of_measurement": state.get("attributes", {}).get("unit_of_measurement")
     }
-@app.get("/kostal/total_dc_input")
+@app.get("/kostal/totaldcinput")
 async def total_dc_input():
     state = await ha_client.get_entity_state(os.getenv("TOTAL_DC_INPUT"))
     log.info(f"TOTAL_DC_INPUT: {state}")
