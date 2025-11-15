@@ -82,3 +82,7 @@ async def total_energy_from_grid():
         "TOTAL_ENERGY_FROM_GRID": state["state"],
         "unit_of_measurement": state.get("attributes", {}).get("unit_of_measurement")
     }
+
+@app.get("/hello")
+async def root():
+    return {"message": "Hello World"}
