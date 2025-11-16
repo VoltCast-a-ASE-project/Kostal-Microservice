@@ -13,6 +13,8 @@ jobs:
       HA_REST_URL: ${{ secrets.HA_REST_URL }}
       HA_TOKEN: ${{ secrets.HA_TOKEN }}
 
+      BATTERY_SOC: ${{secrets.BATTERY_SOC}}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
