@@ -13,7 +13,15 @@ jobs:
       HA_REST_URL: ${{ secrets.HA_REST_URL }}
       HA_TOKEN: ${{ secrets.HA_TOKEN }}
 
+      BATTERY_POWER_IN: ${{ secrets.BATTERY_POWER_IN }}
+      BATTERY_POWER_OUT: ${{ secrets.BATTERY_POWER_OUT }}
       BATTERY_SOC: ${{secrets.BATTERY_SOC}}
+      HOME_POWER: ${{secrets.HOME_POWER}}
+      TOTAL_DC_INPUT: ${{secrets.TOTAL_DC_INPUT}}
+      TOTAL_ENERGY_FROM_GRID: ${{ secrets.TOTAL_ENERGY_FROM_GRID }}
+      TOTAL_ENERGY_TO_GRID: ${{ secrets.TOTAL_ENERGY_TO_GRID }}
+      TOTAL_HOME_CONSUMPTION: ${{ secrets.TOTAL_HOME_CONSUMPTION }}
+
 
     steps:
       - name: Checkout
