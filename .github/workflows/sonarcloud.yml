@@ -9,6 +9,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      HA_REST_URL: ${{ secrets.HA_REST_URL }}
+      HA_TOKEN: ${{ secrets.HA_TOKEN }}
 
     steps:
       - name: Checkout
