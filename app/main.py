@@ -1,5 +1,3 @@
-from typing import Any, Coroutine
-
 from dotenv import load_dotenv
 from fastapi import FastAPI
 
@@ -8,7 +6,6 @@ from app.ha_client import HAClient
 import logging
 import os
 load_dotenv()
-
 app = FastAPI()
 ha_client = HAClient()
 log = logging.getLogger("uvicorn.info")
