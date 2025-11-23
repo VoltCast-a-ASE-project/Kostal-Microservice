@@ -40,7 +40,7 @@ async def total_home_consumption():
 async def total_dc_generation():
     return await ha_client.get_entity_state(os.getenv("TOTAL_GENERATION"))
 
-@app.get("/kostal/historicdata")
+@app.get("/kostal/historicaldata")
 async def historic_data():
     consumption = await total_energy_to_grid()
     return build_history_json(consumption)
