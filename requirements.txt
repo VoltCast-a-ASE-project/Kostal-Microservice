@@ -1,3 +1,5 @@
+respx
+pytest
 fastapi
 python-dotenv
 httpx
