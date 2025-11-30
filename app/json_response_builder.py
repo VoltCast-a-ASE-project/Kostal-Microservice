@@ -34,14 +34,21 @@ def build_interval_json(generation: dict, consumption: dict) -> dict:
         }
     }
 
-def build_history_json(consumption: dict) -> dict:
+def build_history_json(today_data,days_30_data,days_365_data) -> dict:
     return {
-        "inverter": INVERTER_NAME,
         "historic_data": {
-            "energy_consumption": {
-                "unit": consumption.get("attributes", {}).get("unit_of_measurement"),
-                "value": consumption["state"]
+            "energy_consumption_today": {
+                "unit": today_data.unit,
+                "values": today_data.values
             },
-            "timeperiod": ""
+            "energy_consumption_30Days": {
+                "unit": days_30_data.unit,
+                "values": days_30_data.values
+            },
+            "energy_consumption_365Days": {
+                "unit": days_365_data.unit,
+                "values": days_365_data.values
+            }
         }
     }
+
