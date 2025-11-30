@@ -6,5 +6,7 @@ httpx
 uvicorn
 pytest-asyncio
 pytest-cov
+apscheduler
+
 
 
