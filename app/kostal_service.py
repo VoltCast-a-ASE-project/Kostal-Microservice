@@ -1,14 +1,20 @@
 import os
+from app import inverter_db
 from app.ha_client import HAClient
 from app.json_response_builder import (
     build_live_json,
     build_interval_json,
     build_history_json,
 )
+from app.inverter_db import get_last_30_days, get_last_365_days
+from app.inverter_db import  get_today_consumption
+
+
 
 class KostalService:
     def __init__(self, ha_client: HAClient):
         self.ha = ha_client
+        self.db = inverter_db
 
     async def get_realtime_data(self):
         current_generation = await self.ha.get_entity_state(os.getenv("CURRENT_GENERATION"))
@@ -21,6 +27,9 @@ class KostalService:
         total_consumption  = await self.ha.get_entity_state(os.getenv("TOTAL_CONSUMPTION"))
         return build_interval_json(total_generation, total_consumption)
 
-    async def get_historical_data(self):
-        consumption = await self.ha.get_entity_state(os.getenv("TOTAL_ENERGY_TO_GRID"))
-        return build_history_json(consumption)
+    @staticmethod
+    async def get_historical_data():
+        today_data = get_today_consumption()
+        days_30_data = get_last_30_days()
+        days_365_data = get_last_365_days()
+        return build_history_json(today_data, days_30_data,days_365_data)
