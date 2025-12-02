@@ -9,10 +9,11 @@ jobs:
   sonarqube:
     name: SonarQube
     runs-on: macos-latest
+
+
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -27,13 +28,14 @@ jobs:
       - name: Run tests with coverage
         run: |
           export PYTHONPATH="$PYTHONPATH:$(pwd)"
-          pytest --cov=app --cov-report=xml
+          pytest tests \
+            --junitxml=test-results.xml \
+            --cov=app \
+            --cov-report=xml
 
-
-      - name: SonarQube Scan
+      - name: SonarQube Analysis
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 
