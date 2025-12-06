@@ -17,7 +17,6 @@ log = logging.getLogger("uvicorn.info")
 def startup_event():
     init_db()
     log.info("SQLite DB initialized")
-    # Start automatic data collection
     data_collector.start_collection(interval_seconds=15)
 
 @app.on_event("shutdown")
