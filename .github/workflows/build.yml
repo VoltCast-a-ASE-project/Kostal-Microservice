@@ -26,6 +26,8 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run tests with coverage
+        env:
+          HA_REST_URL: ${{ secrets.HA_REST_URL }}
         run: |
           export PYTHONPATH="$PYTHONPATH:$(pwd)"
           pytest tests \
