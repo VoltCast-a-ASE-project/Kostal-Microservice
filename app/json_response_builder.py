@@ -1,3 +1,5 @@
+from random import randint
+
 INVERTER_NAME = "Kostal"
 
 def build_live_json(generation: dict, consumption: dict, capacity: dict) -> dict:
@@ -19,6 +21,26 @@ def build_live_json(generation: dict, consumption: dict, capacity: dict) -> dict
         }
     }
 
+def build_mock_live_json():
+    return {
+        "inverter": "MOCK",
+        "realtime_data": {
+            "current_generation": {
+                "unit": "W",
+                "value": randint(0, 3500)
+            },
+            "current_consumption": {
+                "unit": "W",
+                "value": randint(300, 5000)
+            },
+            "battery_capacity": {
+                "unit": "%",
+                "value": randint(10, 100)
+            }
+        }
+    }
+
+
 def build_interval_json(generation: dict, consumption: dict) -> dict:
     return {
         "inverter": INVERTER_NAME,
@@ -30,6 +52,21 @@ def build_interval_json(generation: dict, consumption: dict) -> dict:
             "total_consumption": {
                 "unit": consumption.get("attributes", {}).get("unit_of_measurement"),
                 "value": consumption["state"]
+            }
+        }
+    }
+
+def build_mock_interval_json():
+    return {
+        "inverter": "MOCK",
+        "lfdata": {
+            "total_generation": {
+                "unit": "kWh",
+                "value": randint(1000, 6000)
+            },
+            "total_consumption": {
+                "unit": "kWh",
+                "value": randint(1500, 7000)
             }
         }
     }
