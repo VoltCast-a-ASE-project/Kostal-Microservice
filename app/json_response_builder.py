@@ -27,17 +27,14 @@ def build_mock_live_json():
         "realtime_data": {
             "current_generation": {
                 "unit": "W",
-                # Using randint for mock/test inverter values
                 "value": randint(0, 3500)
             },
             "current_consumption": {
                 "unit": "W",
-                # Using randint for mock/test inverter values
                 "value": randint(300, 5000)
             },
             "battery_capacity": {
                 "unit": "%",
-                # Using randint for mock/test inverter values
                 "value": randint(10, 100)
             }
         }
@@ -65,12 +62,10 @@ def build_mock_interval_json():
         "lfdata": {
             "total_generation": {
                 "unit": "kWh",
-                # Using randint for mock/test inverter values
                 "value": randint(1000, 6000)
             },
             "total_consumption": {
                 "unit": "kWh",
-                # Using randint for mock/test inverter values
                 "value": randint(1500, 7000)
             }
         }
