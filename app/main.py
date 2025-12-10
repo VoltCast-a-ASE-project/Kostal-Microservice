@@ -19,7 +19,11 @@ USE_MOCK = True
 
 @app.on_event("startup")
 def startup_event():
+    global ha_client, kostal_service, data_collector
+
     if USE_MOCK:
+        ha_client = None
+        kostal_service = KostalService(ha_client=None)
         log.info("MOCK MODE - no DB init, no data collection")
         return
 
@@ -30,6 +34,7 @@ def startup_event():
     init_db()
     log.info("SQLite DB initialized")
     data_collector.start_collection(interval_seconds=15)
+
 
 @app.on_event("shutdown")
 async def shutdown_event():
@@ -50,6 +55,4 @@ async def lf_data():
 
 @app.get("/kostal/historicaldata")
 async def historic_data():
-    if USE_MOCK:
-        return await KostalService.get_historical_data()
     return await kostal_service.get_historical_data()

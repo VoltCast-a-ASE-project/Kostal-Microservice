@@ -45,6 +45,9 @@ def get_today_consumption():
                     """, (start_epoch,end_epoch))
         rows = cur.fetchall()
 
+    if not rows:
+        return HistoricalData(unit="", values=[])
+
     unit = rows[0]["unit"]
     values = _format_time_value_data(rows)
 
@@ -65,6 +68,9 @@ def get_last_30_days():
                     """, (cutoff,))
         rows = cur.fetchall()
 
+    if not rows:
+        return HistoricalData(unit="", values=[])
+
     unit = rows[0]["unit"]
     values = _aggregate_by_date(rows)
 
@@ -84,6 +90,8 @@ def get_last_365_days():
                     ORDER BY epoch ASC
                     """, (cutoff,))
         rows = cur.fetchall()
+    if not rows:
+        return HistoricalData(unit="", values=[])
 
     unit = rows[0]["unit"]
     values = _aggregate_by_date(rows)
