@@ -1,0 +1,6 @@
+services:
+  kostal-ms:
+    build: .
+    image: kostal-ms
+    ports:
+      - "8082:8082"
