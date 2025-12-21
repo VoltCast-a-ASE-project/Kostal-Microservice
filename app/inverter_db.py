@@ -3,6 +3,7 @@ from pathlib import Path
 import time
 from datetime import datetime
 import sqlite3
+from sqlite3 import DatabaseError
 
 DB_PATH = Path(__file__).parent / "database.db"
 
@@ -28,7 +29,98 @@ def init_db():
         )
     """)
     conn.commit()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS inverter (
+            username TEXT PRIMARY KEY NOT NULL,
+            name TEXT NOT NULL,
+            ip_address TEXT NOT NULL,
+            token TEXT NOT NULL
+        )
+    """)
+    conn.commit()
     conn.close()
+
+def get_inverter(username: str):
+    try:
+        with get_connection() as conn:
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM inverter WHERE username = ?", (username,))
+            row = cur.fetchone()
+            return dict(row) if row else None
+    except DatabaseError:
+        return None
+
+
+def add_inverter(data) -> bool:
+
+    with get_connection() as conn:
+        cur = conn.cursor()
+        try:
+            cur.execute("""
+            INSERT INTO inverter (username, name, ip_address, token) VALUES (?, ?, ?, ?)""",
+                        (data["username"], data["name"], data["ip_address"], data["token"]))
+            conn.commit()
+        except DatabaseError:
+            return False
+        finally:
+            conn.close()
+        return True
+
+def update_inverter(data) -> bool:
+    try:
+        with get_connection() as conn:
+            cur = conn.cursor()
+            cur.execute("""
+                UPDATE inverter
+                SET name = ?, ip_address = ?, token = ?
+                WHERE username = ?
+            """, (data["name"], data["ip_address"], data["token"], data["username"]))
+            conn.commit()
+            return cur.rowcount > 0
+    except DatabaseError:
+        return False
+
+
+def delete_inverter(username: str) -> bool:
+    with get_connection() as conn:
+        cur = conn.cursor()
+        try:
+            cur.execute("""
+                        DELETE from inverter WHERE username = ? """, (username,))
+            conn.commit()
+        except DatabaseError:
+            return False
+        finally:
+            conn.close()
+        return True
+
+def get_url(username: str) -> str:
+    try:
+        with get_connection() as conn:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT ip_address
+                FROM inverter
+                WHERE username = ?
+            """, (username,))
+            row = cur.fetchone()
+            return row[0] if row else ""
+    except DatabaseError:
+        return ""
+
+def get_token(username: str) -> str:
+    try:
+        with get_connection() as conn:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT token
+                FROM inverter
+                WHERE username = ?
+            """, (username,))
+            row = cur.fetchone()
+            return row[0] if row else ""
+    except DatabaseError:
+        return ""
 
 
 def get_today_consumption():
