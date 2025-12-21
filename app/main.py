@@ -52,6 +52,8 @@ async def lf_data():
 
 @app.get("/kostal/historicaldata")
 async def historic_data():
+    if USE_MOCK:
+        return build_mock_historic_json()
     return await app.state.kostal_service.get_historical_data()
 
 @app.get("/kostal/{username}")
