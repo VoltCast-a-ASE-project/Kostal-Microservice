@@ -1,13 +1,16 @@
 import os
 from dotenv import load_dotenv
+from app.inverter_db import get_ipadress, get_token
 import httpx
 
 load_dotenv()
 
 class HAClient:
     def __init__(self):
-        self.base_url = os.getenv("HA_REST_URL")
-        self.token = os.getenv("HA_TOKEN")
+        self.base_url = get_ipadress()
+        self.token = get_token()
+
+
 
         if not self.base_url:
             raise ValueError("HA_REST_URL is missing!")

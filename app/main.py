@@ -7,6 +7,8 @@ from app.data_collector import EnergyDataCollector
 from app.inverter_db import init_db, get_inverter, add_inverter, update_inverter, delete_inverter
 from app.kostal_service import KostalService
 import logging
+from fastapi import HTTPException
+
 
 app = FastAPI()
 log = logging.getLogger("uvicorn.info")
@@ -15,19 +17,23 @@ USE_MOCK = True
 
 @app.on_event("startup")
 def startup_event():
+    init_db()
+    log.info("SQLite DB initialized")
+
     if USE_MOCK:
         app.state.ha_client = None
         app.state.kostal_service = KostalService(ha_client=None)
         log.info("MOCK MODE - no DB init, no data collection")
         return
 
-    app.state.ha_client = HAClient()
-    app.state.kostal_service = KostalService(app.state.ha_client)
-    app.state.data_collector = EnergyDataCollector(app.state.ha_client)
-
-    init_db()
-    log.info("SQLite DB initialized")
-    app.state.data_collector.start_collection(interval_seconds=15)
+    try:
+        app.state.ha_client = HAClient()
+        app.state.kostal_service = KostalService(app.state.ha_client)
+        app.state.data_collector = EnergyDataCollector(app.state.ha_client)
+        app.state.data_collector.start_collection(interval_seconds=15)
+    except ValueError as e:
+        app.state.data_collector = None
+        log.warning(f"No inverter config yet -> collector not started: {e}")
 
 
 @app.on_event("shutdown")
@@ -38,23 +44,50 @@ async def shutdown_event():
 
 @app.get("/kostal/realtimedata")
 async def realtime_data():
-    if USE_MOCK:
-        return build_mock_live_json()
-    return await app.state.kostal_service.get_realtime_data()
+    try:
+        if USE_MOCK:
+            return build_mock_live_json()
+        client = HAClient()  # kann ValueError werfen
+        service = KostalService(client)
+        return await service.get_realtime_data()
+    except ValueError as e:
+        log.error(f"Config/DB missing: {e}")
+        raise HTTPException(status_code=503, detail=str(e))
+    except Exception as e:
+        log.exception("Unexpected error")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
 @app.get("/kostal/lfdata")
 async def lf_data():
-    if USE_MOCK:
-        return build_mock_interval_json()
-    return await app.state.kostal_service.get_lf_data()
+    try:
+        if USE_MOCK:
+            return build_mock_interval_json()
+        client = HAClient()
+        service = KostalService(client)
+        return await service.get_lf_data()
+    except ValueError as e:
+        log.error(f"Config/DB missing: {e}")
+        raise HTTPException(status_code=503, detail=str(e))
+    except Exception as e:
+        log.exception("Unexpected error")
+        return await app.state.kostal_service.get_lf_data()
 
 
 @app.get("/kostal/historicaldata")
 async def historic_data():
-    if USE_MOCK:
-        return build_mock_historic_json()
-    return await app.state.kostal_service.get_historical_data()
+    try:
+        if USE_MOCK:
+            return build_mock_historic_json()
+        client = HAClient()
+        service = KostalService(client)
+        return await service.get_historical_data()
+    except ValueError as e:
+        log.error(f"Config/DB missing: {e}")
+        raise HTTPException(status_code=503, detail=str(e))
+    except Exception as e:
+        log.exception("Unexpected error")
+        return await app.state.kostal_service.get_historical_data()
 
 @app.get("/kostal/{username}")
 async def api_get_inverter(username: str):
