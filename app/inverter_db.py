@@ -53,18 +53,18 @@ def get_inverter(username: str):
 
 def add_inverter(data) -> bool:
 
-    with get_connection() as conn:
-        cur = conn.cursor()
-        try:
-            cur.execute("""
-            INSERT INTO inverter (username, name, ip_address, token) VALUES (?, ?, ?, ?)""",
-                        (data["username"], data["name"], data["ip_address"], data["token"]))
+    try:
+        with get_connection() as conn:
+            cur = conn.cursor()
+            cur.execute(
+                "INSERT INTO inverter (username, name, ip_address, token) VALUES (?, ?, ?, ?)",
+                (data["username"], data["name"], data["ip_address"], data["token"])
+            )
             conn.commit()
-        except DatabaseError:
-            return False
-        finally:
-            conn.close()
         return True
+    except DatabaseError:
+        return False
+
 
 def update_inverter(data) -> bool:
     try:
@@ -82,45 +82,42 @@ def update_inverter(data) -> bool:
 
 
 def delete_inverter(username: str) -> bool:
-    with get_connection() as conn:
-        cur = conn.cursor()
-        try:
+    try:
+        with get_connection() as conn:
+            cur = conn.cursor()
             cur.execute("""
-                        DELETE from inverter WHERE username = ? """, (username,))
+                        DELETE
+                        from inverter
+                        WHERE username = ? """, (username,))
             conn.commit()
-        except DatabaseError:
-            return False
-        finally:
-            conn.close()
         return True
+    except DatabaseError:
+        return False
 
-def get_url(username: str) -> str:
+
+def get_token() -> str:
     try:
         with get_connection() as conn:
             cur = conn.cursor()
-            cur.execute("""
-                SELECT ip_address
-                FROM inverter
-                WHERE username = ?
-            """, (username,))
-            row = cur.fetchone()
-            return row[0] if row else ""
-    except DatabaseError:
+            cur.execute("SELECT token FROM inverter")
+            data = cur.fetchall()
+            return data[0][0] if data else ""
+    except DatabaseError as e:
+        print(e)
         return ""
 
-def get_token(username: str) -> str:
+def get_ipadress() -> str:
     try:
         with get_connection() as conn:
             cur = conn.cursor()
-            cur.execute("""
-                SELECT token
-                FROM inverter
-                WHERE username = ?
-            """, (username,))
-            row = cur.fetchone()
-            return row[0] if row else ""
-    except DatabaseError:
+            cur.execute("SELECT ip_address FROM inverter")
+            data = cur.fetchall()
+            return data[0][0] if data else ""
+    except DatabaseError as e:
+        print(e)
         return ""
+
+
 
 
 def get_today_consumption():
