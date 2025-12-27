@@ -1,6 +1,14 @@
 services:
   kostal-ms:
     build: .
-    image: kostal-ms
+    image: ghcr.io/voltcast-a-ase-project/kostal-microservice/kostal-ms:latest
+    networks:
+      - VoltCast_Network
     ports:
       - "8082:8082"
+    expose:
+      - "8082"
+
+networks:
+  VoltCast_Network:
+    external: true
