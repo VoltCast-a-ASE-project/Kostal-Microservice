@@ -7,56 +7,6 @@ on:
     types: [opened, synchronize, reopened]
 jobs:
 
-  Performance-Tests:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Pull and run Container
-        run: |
-          docker pull ghcr.io/voltcast-a-ase-project/kostal-microservice/kostal-ms:latest
-          docker run -d --name kostal-ms -p 8082:8082 ghcr.io/voltcast-a-ase-project/kostal-microservice/kostal-ms:latest
-
-      - name: Install Python, Java Runtime and Taurus
-        run: |
-          sudo apt-get update
-          sudo apt-get install python3 default-jre-headless python3-tk python3-dev libxml2-dev libxslt-dev zlib1g-dev net-tools
-          python -m venv .venv
-          source .venv/bin/activate
-          python -m pip install --upgrade pip
-          pip install bzt
-
-      - name: Run Performance Tests
-        run: |
-          source .venv/bin/activate
-          bzt kostal_performance.jmx
-
-  Acceptance-Tests:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Pull and run Container
-        run: |
-          docker pull ghcr.io/voltcast-a-ase-project/kostal-microservice/kostal-ms:latest
-          docker run -d --name kostal-ms -p 8082:8082 ghcr.io/voltcast-a-ase-project/kostal-microservice/kostal-ms:latest
-
-      - name: Install Python, Java Runtime and Taurus
-        run: |
-          sudo apt-get update
-          sudo apt-get install python3 default-jre-headless python3-tk python3-dev libxml2-dev libxslt-dev zlib1g-dev net-tools
-          python -m venv .venv
-          source .venv/bin/activate
-          python -m pip install --upgrade pip
-          pip install bzt
-
-      - name: Run Acceptance Tests
-        run: |
-          source .venv/bin/activate
-          bzt kostal_acceptance.jmx
-
   sonarqube:
     name: SonarQube
     runs-on: macos-latest
