@@ -30,12 +30,12 @@ This microservice bridges Kostal solar inverters and the VoltCast application, p
 
 ### Configuration Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/kostal/{username}` | GET | Get inverter config |
-| `/kostal` | POST | Create inverter config |
-| `/kostal` | PUT | Update inverter config |
-| `/kostal/user/{user}` | DELETE | Delete inverter config |
+| Endpoint                       | Method | Description |
+|--------------------------------|--------|-------------|
+| `/kostal/inverter/{username}`  | GET | Get inverter config |
+| `/kostal/inverter`             | POST | Create inverter config |
+| `/kostal/inverter`             | PUT | Update inverter config |
+| `/kostal/inverter/user/{user}` | DELETE | Delete inverter config |
 
 
 ## Database
