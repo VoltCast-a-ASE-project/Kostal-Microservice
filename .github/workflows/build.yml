@@ -18,6 +18,11 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Pull and run Container
+        run: |
+          docker pull docker pull ghcr.io/voltcast-a-ase-project/kostal-microservice/kostal-ms:latest
+          docker run docker pull ghcr.io/voltcast-a-ase-project/kostal-microservice/kostal-ms:latest
+
       - name: Install Java Runtime + OS libs
         run: |
           sudo apt-get update
