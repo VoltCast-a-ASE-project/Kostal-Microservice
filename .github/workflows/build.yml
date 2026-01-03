@@ -13,14 +13,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Python, Java Runtime and Taurus
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Java Runtime + OS libs
         run: |
-          sudo apt update
-          sudo apt install python3 default-jre-headless python3-tk python3-pip python3-dev libxml2-dev libxslt-dev zlib1g-dev net-tools
-          sudo python3 -m pip install bzt
+          sudo apt-get update
+          sudo apt-get install -y default-jre-headless python3-tk python3-dev libxml2-dev libxslt-dev zlib1g-dev net-tools
+
+      - name: Install Taurus (bzt) in venv
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install bzt
 
       - name: Run JMeter Test
-        run: bzt kostal_performance.jmx
+        run: |
+          source .venv/bin/activate
+          bzt kostal_performance.jmx
 
   sonarqube:
     name: SonarQube
