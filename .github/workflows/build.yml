@@ -21,10 +21,7 @@ jobs:
       - name: Pull and run Container
         run: |
           docker pull ghcr.io/voltcast-a-ase-project/kostal-microservice/kostal-ms:latest
-          docker run -d \
-            --name kostal-ms \
-            -p 8082:8082 \
-            ghcr.io/voltcast-a-ase-project/kostal-microservice/kostal-ms:latest
+          docker run -d --name kostal-ms -p 8082:8082 ghcr.io/voltcast-a-ase-project/kostal-microservice/kostal-ms:latest
 
       - name: Install Java Runtime + OS libs
         run: |
