@@ -42,7 +42,7 @@ jobs:
 
       - name: Run Accepting Tests
         run: |
-          source.venc/bin/activate
+          source .venv/bin/activate
           bzt kostal_acceptance.jmx
 
   sonarqube:
