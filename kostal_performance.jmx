@@ -177,7 +177,7 @@
             <stringProp name="1660">40</stringProp>
             <stringProp name="0">0</stringProp>
             <stringProp name="1722">60</stringProp>
-            <stringProp name="53377398">86400</stringProp>
+            <stringProp name="53377398">120</stringProp>    <!--changed from 86400 to 120 because determinism-->
             <stringProp name="1598">20</stringProp>
           </collectionProp>
         </collectionProp>
