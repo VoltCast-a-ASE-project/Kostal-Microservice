@@ -6,6 +6,22 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:
+
+  jmeter-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Python, Java Runtime and Taurus
+        run: |
+          sudo apt update
+          sudo apt install python3 default-jre-headless python3-tk python3-pip python3-dev libxml2-dev libxslt-dev zlib1g-dev net-tools
+          sudo python3 -m pip install bzt
+
+      - name: Run JMeter Test
+        run: bzt kostal_performance.jmx
+
   sonarqube:
     name: SonarQube
     runs-on: macos-latest
