@@ -244,7 +244,7 @@ def test_get_inverter_404(client, monkeypatch):
 
 def test_get_inverter_200(client, monkeypatch):
     monkeypatch.setattr(main, "get_inverter", lambda u: {"username": u})
-    r = client.get("/kostal/Philipp2")
+    r = client.get("/kostal/inverter/Philipp2")
     assert r.status_code == 200
     assert r.json()["username"] == "Philipp2"
 
@@ -252,37 +252,37 @@ def test_get_inverter_200(client, monkeypatch):
 # ---------- POST /kostal ----------
 def test_post_add_200(client, monkeypatch):
     monkeypatch.setattr(main, "add_inverter", lambda body: True)
-    r = client.post("/kostal", json={"username": "u", "name": "n", "ip_address": "ip", "token": "t"})
+    r = client.post("/kostal/inverter", json={"username": "u", "name": "n", "ip_address": "ip", "token": "t"})
     assert r.status_code == 200
 
 
 def test_post_add_500(client, monkeypatch):
     monkeypatch.setattr(main, "add_inverter", lambda body: False)
-    r = client.post("/kostal", json={"username": "u", "name": "n", "ip_address": "ip", "token": "t"})
+    r = client.post("/kostal/inverter", json={"username": "u", "name": "n", "ip_address": "ip", "token": "t"})
     assert r.status_code == 500
 
 
 # ---------- PUT /kostal ----------
 def test_put_update_200(client, monkeypatch):
     monkeypatch.setattr(main, "update_inverter", lambda body: True)
-    r = client.put("/kostal", json={"username": "u"})
+    r = client.put("/kostal/inverter", json={"username": "u"})
     assert r.status_code == 200
 
 
 def test_put_update_500(client, monkeypatch):
     monkeypatch.setattr(main, "update_inverter", lambda body: False)
-    r = client.put("/kostal", json={"username": "u"})
+    r = client.put("/kostal/inverter", json={"username": "u"})
     assert r.status_code == 500
 
 
 # ---------- DELETE /kostal/user/{user} ----------
 def test_delete_200(client, monkeypatch):
     monkeypatch.setattr(main, "delete_inverter", lambda u: True)
-    r = client.delete("/kostal/user/Philipp2")
+    r = client.delete("/kostal/inverter/user/Philipp2")
     assert r.status_code == 200
 
 
 def test_delete_500(client, monkeypatch):
     monkeypatch.setattr(main, "delete_inverter", lambda u: False)
-    r = client.delete("/kostal/user/Philipp2")
+    r = client.delete("/kostal/inverter/user/Philipp2")
     assert r.status_code == 500
