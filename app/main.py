@@ -89,7 +89,7 @@ async def historic_data():
         log.exception("Unexpected error")
         return await app.state.kostal_service.get_historical_data()
 
-@app.get("/kostal/{username}")
+@app.get("/kostal/inverter/{username}")
 async def api_get_inverter(username: str):
     data = get_inverter(username)
     if not data:
@@ -97,7 +97,7 @@ async def api_get_inverter(username: str):
     return data
 
 
-@app.post("/kostal")
+@app.post("/kostal/inverter")
 async def api_add_inverter(request: Request):
 
     body = await request.json()
@@ -108,7 +108,7 @@ async def api_add_inverter(request: Request):
 
     return Response("Added inverter to database", status_code=200)
 
-@app.put("/kostal")
+@app.put("/kostal/inverter")
 async def api_update_inverter(request: Request):
 
     body = await request.json()
@@ -119,7 +119,7 @@ async def api_update_inverter(request: Request):
     return Response("Updated inverter data", status_code=200)
 
 
-@app.delete("/kostal/user/{user}")
+@app.delete("/kostal/inverter/user/{user}")
 async def api_delete_inverter(user: str):
 
     if not delete_inverter(user):
