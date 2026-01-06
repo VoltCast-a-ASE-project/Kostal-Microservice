@@ -1,3 +1,4 @@
+import json
 
 from fastapi import FastAPI, Request, Response
 from app.ha_client import HAClient
@@ -101,12 +102,17 @@ async def api_get_inverter(username: str):
 async def api_add_inverter(request: Request):
 
     body = await request.json()
-    print(body)
 
     if not add_inverter(body):
-        return Response("Internal Server Error: Failed to add inverter data to database", status_code=500)
+        response_data ={
+            "message": "Internal Server Error: Failed to add inverter data to database"
+        }
+        return Response(content=json.dumps(response_data), status_code=500)
 
-    return Response("Added inverter to database", status_code=200)
+    response_data ={
+        "message": "Added inverter to database"
+    }
+    return Response(content=json.dumps(response_data), status_code=200)
 
 @app.put("/kostal/inverter")
 async def api_update_inverter(request: Request):
@@ -114,15 +120,26 @@ async def api_update_inverter(request: Request):
     body = await request.json()
 
     if not update_inverter(body):
+        response_data ={
+            "message": "Internal Server Error: Failed to update inverter data"
+        }
         return Response("Internal Server Error: Failed to update inverter data", status_code=500)
 
-    return Response("Updated inverter data", status_code=200)
+    response_data ={
+        "message": "Added inverter to database"
+    }
+    return Response(content=json.dumps(response_data), status_code=200)
 
 
 @app.delete("/kostal/inverter/user/{user}")
 async def api_delete_inverter(user: str):
 
     if not delete_inverter(user):
+        response_data ={
+            "message": "Internal Server Error: Failed to update inverter data"
+        }
         return Response("Internal Server Error: Failed to delete inverter", status_code=500)
-
-    return Response("Deleted inverter for user", status_code=200)
+    response_data = {
+        "message": "Deleted inverter for user"
+    }
+    return Response(content=json.dumps(response_data), status_code=200)
