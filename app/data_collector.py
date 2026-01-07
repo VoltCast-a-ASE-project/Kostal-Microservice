@@ -8,13 +8,17 @@ import os
 log = logging.getLogger("uvicorn.info")
 
 class EnergyDataCollector:
+    """Periodically collects and stores energy consumption data from Home Assistant."""
+
     def __init__(self, ha_client: HAClient):
+        """Initialize the collector with a Home Assistant client."""
         self.ha = ha_client
         self.scheduler = AsyncIOScheduler()
         self.consumption_entity = os.getenv("CURRENT_CONSUMPTION")
 
 
     def start_collection(self, interval_seconds: int):
+        """Start periodic data collection at specified interval."""
         self.scheduler.add_job(
             self.fetch_and_store,
             'interval',
@@ -27,6 +31,7 @@ class EnergyDataCollector:
 
 
     async def fetch_and_store(self):
+        """Fetch current consumption data and store it in the database."""
         try:
             data = await self.ha.get_entity_state(self.consumption_entity)
             value = float(data["state"])
@@ -42,12 +47,14 @@ class EnergyDataCollector:
             log.error(f"✗ Error collecting data: {e}")
 
     def stop_collection(self):
+        """Stop the periodic data collection."""
         if self.scheduler.running:
             self.scheduler.shutdown()
             log.info(" Stopped data collection")
 
 
 def _store_to_db(epoch: int, unit: str, value: float):
+    """Store energy consumption data point to the database."""
     with get_connection() as conn:
         cur = conn.cursor()
         cur.execute("""
