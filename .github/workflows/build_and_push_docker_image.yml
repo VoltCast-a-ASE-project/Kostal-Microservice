@@ -72,13 +72,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install python3 default-jre-headless python3-tk python3-pip python3-dev libxml2-dev libxslt-dev zlib1g-dev net-tools
           python3 -m venv venv
-          source venv/bin/activate
+          source .venv/bin/activate
           pip install --upgrade pip
           pip install bzt
 
       - name: Run acceptance test
         run: |
-          source venv/bin/activate
+          source .venv/bin/activate
           ART_DIR="$PWD/artifacts_acceptance"
           echo "Artifacts dir: $ART_DIR"
           mkdir -p "$ART_DIR"
@@ -150,7 +150,7 @@ jobs:
 
       - name: Performance Tests
         run: |
-          source venv/bin/activate
+          source .venv/bin/activate
           ART_DIR="$PWD/artifacts_acceptance"
           echo "Artifacts dir: $ART_DIR"
           mkdir -p "$ART_DIR"
