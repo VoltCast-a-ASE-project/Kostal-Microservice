@@ -18,6 +18,7 @@ USE_MOCK = True
 
 @app.on_event("startup")
 def startup_event():
+    """Initialize database and services on application startup."""
     init_db()
     log.info("SQLite DB initialized")
 
@@ -39,16 +40,18 @@ def startup_event():
 
 @app.on_event("shutdown")
 async def shutdown_event():
+    """Stop data collection on application shutdown."""
     if not USE_MOCK:
         app.state.data_collector.stop_collection()
 
 
 @app.get("/kostal/realtimedata")
 async def realtime_data():
+    """Get current real-time-data power generation, consumption, and battery capacity."""
     try:
         if USE_MOCK:
             return build_mock_live_json()
-        client = HAClient()  # kann ValueError werfen
+        client = HAClient()
         service = KostalService(client)
         return await service.get_realtime_data()
     except ValueError as e:
@@ -61,6 +64,7 @@ async def realtime_data():
 
 @app.get("/kostal/lfdata")
 async def lf_data():
+    """Get low frequency data generation and consumption data."""
     try:
         if USE_MOCK:
             return build_mock_interval_json()
@@ -77,6 +81,7 @@ async def lf_data():
 
 @app.get("/kostal/historicaldata")
 async def historic_data():
+    """Get historical energy consumption data for today, last 30 days, and last 365 days."""
     try:
         if USE_MOCK:
             return build_mock_historic_json()
@@ -92,6 +97,7 @@ async def historic_data():
 
 @app.get("/kostal/inverter/{username}")
 async def api_get_inverter(username: str):
+    """Retrieve inverter configuration for a specific username."""
     data = get_inverter(username)
     if not data:
         return Response("Not found", status_code=404)
@@ -100,7 +106,7 @@ async def api_get_inverter(username: str):
 
 @app.post("/kostal/inverter")
 async def api_add_inverter(request: Request):
-
+    """Add new inverter configuration to the database."""
     body = await request.json()
 
     if not add_inverter(body):
@@ -116,7 +122,7 @@ async def api_add_inverter(request: Request):
 
 @app.put("/kostal/inverter")
 async def api_update_inverter(request: Request):
-
+    """Update existing inverter configuration in the database."""
     body = await request.json()
 
     if not update_inverter(body):
@@ -133,7 +139,7 @@ async def api_update_inverter(request: Request):
 
 @app.delete("/kostal/inverter/user/{user}")
 async def api_delete_inverter(user: str):
-
+    """Delete inverter configuration for a specific user."""
     if not delete_inverter(user):
         response_data ={
             "message": "Internal Server Error: Failed to update inverter data"
