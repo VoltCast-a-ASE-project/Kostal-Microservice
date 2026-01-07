@@ -7,6 +7,7 @@ from app.inverter_db import HistoricalData
 INVERTER_NAME = "Kostal"
 
 def build_live_json(generation: dict, consumption: dict, capacity: dict) -> dict:
+    """Build JSON response for real-time inverter data."""
     return {
         "inverter": INVERTER_NAME,
         "realtime_data": {
@@ -26,6 +27,7 @@ def build_live_json(generation: dict, consumption: dict, capacity: dict) -> dict
     }
 
 def build_mock_live_json():
+    """Build mock JSON response for real-time inverter data with random values."""
     return {
         "inverter": "MOCK",
         "realtime_data": {
@@ -46,6 +48,7 @@ def build_mock_live_json():
 
 
 def build_interval_json(generation: dict, consumption: dict) -> dict:
+    """Build JSON response for low frequent generation and consumption data."""
     return {
         "inverter": INVERTER_NAME,
         "lfdata": {
@@ -61,6 +64,7 @@ def build_interval_json(generation: dict, consumption: dict) -> dict:
     }
 
 def build_mock_interval_json():
+    """Build mock JSON response for lifetime data with random values."""
     return {
         "inverter": "MOCK",
         "lfdata": {
@@ -76,6 +80,7 @@ def build_mock_interval_json():
     }
 
 def build_history_json(today_data,days_30_data,days_365_data) -> dict:
+    """Build JSON response for historical consumption data across different time periods."""
     return {
         "historic_data": {
             "energy_consumption_today": {
@@ -94,18 +99,21 @@ def build_history_json(today_data,days_30_data,days_365_data) -> dict:
     }
 
 def build_mock_historic_json() -> dict:
+    """Build mock JSON response for historical consumption data with random values."""
     today = _mock_today_consumption()
     days_30 = _mock_last_days(30)
     days_365 = _mock_last_days(365)
     return build_history_json(today, days_30, days_365)
 
 def _mock_today_consumption() -> HistoricalData:
+    """Generate mock hourly consumption data for today."""
     return HistoricalData(
         "W",
         [{"time": f"{h:02d}:00", "value": randint(150, 800)} for h in range(24)]
     )
 
 def _mock_last_days(days: int) -> HistoricalData:
+    """Generate mock daily consumption data for the specified number of past days."""
     today = datetime.now().date()
     return HistoricalData(
         "W",

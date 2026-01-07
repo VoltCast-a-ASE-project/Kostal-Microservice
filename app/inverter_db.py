@@ -8,16 +8,21 @@ from sqlite3 import DatabaseError
 DB_PATH = Path(__file__).parent / "database.db"
 
 class HistoricalData:
+    """Container for historical energy data with unit and time-series values."""
+
     def __init__(self, unit: str, values: list):
+        """Initialize with measurement unit and data values."""
         self.unit = unit
         self.values = values
 
 def get_connection():
+    """Create and return a database connection with Row factory."""
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
 def init_db():
+    """Initialize database tables for historic data and inverter configuration."""
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("""
@@ -41,6 +46,7 @@ def init_db():
     conn.close()
 
 def get_inverter(username: str):
+    """Retrieve inverter configuration for a specific username."""
     try:
         with get_connection() as conn:
             cur = conn.cursor()
@@ -52,7 +58,7 @@ def get_inverter(username: str):
 
 
 def add_inverter(data) -> bool:
-
+    """Add new inverter configuration to the database."""
     try:
         with get_connection() as conn:
             cur = conn.cursor()
@@ -67,6 +73,7 @@ def add_inverter(data) -> bool:
 
 
 def update_inverter(data) -> bool:
+    """Update existing inverter configuration in the database."""
     try:
         with get_connection() as conn:
             cur = conn.cursor()
@@ -82,6 +89,7 @@ def update_inverter(data) -> bool:
 
 
 def delete_inverter(username: str) -> bool:
+    """Delete inverter configuration for a specific username."""
     try:
         with get_connection() as conn:
             cur = conn.cursor()
@@ -96,6 +104,7 @@ def delete_inverter(username: str) -> bool:
 
 
 def get_token() -> str:
+    """Retrieve the inverter's authentication token from the database."""
     try:
         with get_connection() as conn:
             cur = conn.cursor()
@@ -107,6 +116,7 @@ def get_token() -> str:
         return ""
 
 def get_ipadress() -> str:
+    """Retrieve the inverter's IP address from the database."""
     try:
         with get_connection() as conn:
             cur = conn.cursor()
@@ -121,6 +131,7 @@ def get_ipadress() -> str:
 
 
 def get_today_consumption():
+    """Retrieve energy consumption data for the current day."""
     start_epoch = get_today_start_epoch()
     end_epoch = get_today_end_epoch()
 
@@ -144,6 +155,7 @@ def get_today_consumption():
 
 
 def get_last_30_days():
+    """Retrieve aggregated daily energy consumption for the last 30 days."""
     now_epoch = int(time.time())
     cutoff = now_epoch - 30 * 24 * 3600
 
@@ -167,6 +179,7 @@ def get_last_30_days():
 
 
 def get_last_365_days():
+    """Retrieve aggregated daily energy consumption for the last 365 days."""
     now_epoch = int(time.time())
     cutoff = now_epoch - 365 * 24 * 3600
 
@@ -189,17 +202,20 @@ def get_last_365_days():
 
 
 def get_today_start_epoch():
+    """Get epoch timestamp for today's midnight (00:00:00)."""
     now = datetime.now()
     today_midnight = datetime(now.year, now.month, now.day, 0, 0, 0)
     return int(today_midnight.timestamp())
 
 def get_today_end_epoch():
+    """Get epoch timestamp for today's end (23:59:59)."""
     now = datetime.now()
     today_midnight = datetime(now.year, now.month, now.day, 23, 59, 59)
     return int(today_midnight.timestamp())
 
 
 def _format_time_value_data(rows):
+    """Format database rows into time-value pairs for intraday data."""
     return [
         {
             "time": _epoch_to_time_string(row["epoch"]),
@@ -209,9 +225,11 @@ def _format_time_value_data(rows):
     ]
 
 def _epoch_to_time_string(epoch):
+    """Convert epoch timestamp to HH:MM time string."""
     return datetime.fromtimestamp(epoch).strftime("%H:%M")
 
 def _aggregate_by_date(rows):
+    """Aggregate consumption values by date and return sorted date-value pairs."""
     per_day = defaultdict(float)
     for row in rows:
         date_str = datetime.fromtimestamp(row["epoch"]).strftime("%Y-%m-%d")
