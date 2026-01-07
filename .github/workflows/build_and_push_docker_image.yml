@@ -10,7 +10,8 @@ env:
   COMPOSE_FILE: docker-compose.yml
 
 jobs:
-  build-and-push:
+
+  build-docker-image:
     name: Build and push docker image to Github registry
     runs-on: ubuntu-latest
     permissions:
@@ -20,13 +21,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for docker
         id: meta
@@ -48,3 +42,165 @@ jobs:
           # Build and push each service defined in docker-compose.yml
           docker compose -f ${{ env.COMPOSE_FILE }} build
           docker compose -f ${{ env.COMPOSE_FILE }} push
+
+  acceptance-test:
+    name: Runs acceptance tests
+    runs-on: ubuntu-latest
+    needs: build-docker-image
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup container with cleanup
+        run: |
+          docker network create VoltCast_Network || true
+          docker compose -f ${{ env.COMPOSE_FILE }} down -v || true
+           docker compose -f ${{ env.COMPOSE_FILE }} up -d --build --force-recreate kostal-ms        
+      - name: Wait for Kostal-MS
+        run: |
+          for i in {1..15}; do
+            if curl -s http://localhost:8083/kostal/lfdata; then
+              echo " Kostal-MS is up!"
+              break
+            else
+              echo " Waiting for Kostal-MS..."
+              sleep 2
+            fi
+          done
+
+      - name: Install Python, Java Runtime and Taurus
+        run: |
+          sudo apt-get update
+          sudo apt-get install python3 default-jre-headless python3-tk python3-pip python3-dev libxml2-dev libxslt-dev zlib1g-dev net-tools
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install bzt
+
+      - name: Run acceptance test
+        run: |
+          source venv/bin/activate
+          ART_DIR="$PWD/artifacts_acceptance"
+          echo "Artifacts dir: $ART_DIR"
+          mkdir -p "$ART_DIR"
+          bzt kostal_acceptance.jmx -o settings.artifacts-dir="$ART_DIR" -o modules.console.disable=true -l "$ART_DIR/bzt.log" || true,
+
+      - name: Check JMeter/Taurus results
+        run: |
+          ERROR_RATE=$(awk -F',' '
+          NR==1 { next }
+          {
+            total++
+            if ($8 == "false") errors++
+          }
+          END {
+            if (total > 0)
+              printf "%.2f\n", (errors / total) * 100
+            else
+              print "0.00"
+          }
+          ' artifacts_acceptance/kpi.jtl)
+          THRESHOLD=10
+          echo "Error rate: $ERROR_RATE %"
+          if (( $(echo "$ERROR_RATE > THRESHOLD" | bc -l) )); then
+            echo "Error rate too high, failing the job!"
+            exit 1
+          fi
+
+      - name: Stop test containers
+        if: always()
+        run: docker compose -f ${{ env.COMPOSE_FILE }} down -v
+
+
+  performance-test:
+    name: Runs jmeter tests
+    runs-on: ubuntu-latest
+    needs: acceptance-test
+
+    steps:
+
+      - uses: actions/checkout@v4
+
+
+      - name: Setup container with cleanup
+        run: |
+          docker network create VoltCast_Network || true
+          docker compose -f ${{ env.COMPOSE_FILE }} down -v || true
+          docker compose -f ${{ env.COMPOSE_FILE }} up -d --build --force-recreate kostal-ms
+
+      - name: Wait for Kostal-MS
+        run: |
+          for i in {1..15}; do
+            if curl -s http://localhost:8082/kostal/lfdata; then
+              echo " Kostal-MS is up!"
+              break
+            else
+              echo " Waiting for Kostal-MS..."
+              sleep 2
+            fi
+          done
+
+      - name: Install Python, Java Runtime and Taurus
+        run: |
+          sudo apt-get update
+          sudo apt-get install python3 default-jre-headless python3-tk python3-dev libxml2-dev libxslt-dev zlib1g-dev net-tools
+          python -m venv .venv
+          source .venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install bzt
+
+      - name: Performance Tests
+        run: |
+          source venv/bin/activate
+          ART_DIR="$PWD/artifacts_acceptance"
+          echo "Artifacts dir: $ART_DIR"
+          mkdir -p "$ART_DIR"
+          bzt kostal_performance.jmx -o settings.artifacts-dir="$ART_DIR" -o modules.console.disable=true -l "$ART_DIR/bzt.log" || true
+
+      - name: Check JMeter/Taurus results
+        run: |
+          ERROR_RATE=$(awk -F',' '
+          NR==1 { next }
+          {
+            total++
+            if ($8 == "false") errors++
+          }
+          END {
+            if (total > 0)
+              printf "%.2f\n", (errors / total) * 100
+            else
+              print "0.00"
+          }
+          ' artifacts_acceptance/kpi.jtl)
+          THRESHOLD=10
+          echo "Error rate: $ERROR_RATE %"
+          if (( $(echo "$ERROR_RATE > THRESHOLD" | bc -l) )); then
+            echo "Error rate too high, failing the job!"
+            exit 1
+          fi   
+
+      - name: Stop test containers
+        if: always()
+        run: docker compose -f ${{ env.COMPOSE_FILE }} down -v
+
+
+  push-docker-image:
+    name: Push Kostal-MS to GHCR
+    runs-on: ubuntu-latest
+    needs: [ acceptance-test, performance-test ]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push production image
+        run: |
+          docker compose -f ${{ env.COMPOSE_FILE }} build --no-cache kostal-ms
+          docker compose -f ${{ env.COMPOSE_FILE }} push kostal-ms
+
+
+
+
