@@ -119,7 +119,7 @@ jobs:
 
 
   performance-test:
-    name: Runs jmeter tests
+    name: Runs performance tests
     runs-on: ubuntu-latest
     needs: acceptance-test
 
